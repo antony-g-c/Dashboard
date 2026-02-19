@@ -59,33 +59,28 @@ def sales_summary(request):
     if period == 'day':
         trunc = TruncDay('created_at')
     elif period == 'week':
-        trunc = TruncWeek('created_at')
+        trunc = TruncDay('created_at')
     elif period == 'month':
-        trunc = TruncMonth('created_at')
+        trunc = TruncDay('created_at')
     elif period == 'custom':
-        trunc = None
+        trunc = TruncDay('created_at')
     else:
         return Response({"error": "Invalid period"}, status=400)
 
-    # Filter paid orders
-    qs = Order.objects.filter(is_paid=True)
+    # Sales is represented as order value grouped by created date.
+    # Cash received should be tracked separately from sales.
+    qs = Order.objects.exclude(total_amount__isnull=True)
 
     if start and end:
         qs = qs.filter(created_at__range=[start, end])
 
     # Grouped data for the chart
-    if trunc:
-        data = (
-            qs.annotate(period=trunc)
-            .values('period')
-            .annotate(total=Sum('total_amount'))
-            .order_by('period')
-        )
-    else:
-        data = [
-            {"period": order.created_at.date(), "total": order.total_amount}
-            for order in qs
-        ]
+    data = list(
+        qs.annotate(period=trunc)
+        .values('period')
+        .annotate(total=Sum('total_amount'))
+        .order_by('period')
+    )
 
     # Extra: list of individual shipped orders and their processing time
     shipped_orders = Order.objects.filter(status="Shipped", shipped_at__isnull=False)

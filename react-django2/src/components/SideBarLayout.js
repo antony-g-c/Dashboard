@@ -40,7 +40,13 @@ const SidebarLayout = () => {
       {/* Sidebar */}
       <div
         className="bg-dark text-white p-3"
-        style={{ width: "220px", minHeight: "100vh" }}
+        style={{
+          width: "220px",
+          minHeight: "100vh",
+          position: "sticky",
+          top: 0,
+          alignSelf: "flex-start"
+        }}
       >
         <h4 className="mb-4">Dashboard</h4>
         <ul className="nav flex-column">

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import CustomerList from "./CustomerList";
+import AddCustomer from "./AddCustomer";
 import OrderList from "./OrderList";
 import AddOrder from "./AddOrder";
 import OrderItemList from "./OrderItemList";
@@ -8,6 +9,7 @@ import AddOrderItem from "./AddOrderItem";
 const OrderManager = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
 
   const [showAddOrder, setShowAddOrder] = useState(false);
   const [editOrder, setEditOrder] = useState(null);
@@ -15,6 +17,7 @@ const OrderManager = () => {
   const [showAddItem, setShowAddItem] = useState(false);
   const [editItem, setEditItem] = useState(null);
 
+  const [refreshCustomers, setRefreshCustomers] = useState(() => () => {});
   const [refreshOrders, setRefreshOrders] = useState(() => () => {});
   const [refreshItems, setRefreshItems] = useState(() => () => {});
 
@@ -28,7 +31,21 @@ const OrderManager = () => {
               setSelectedCustomer(c);
               setSelectedOrder(null);
             }}
+            onShowAddCustomer={(show) => setShowAddCustomer(show)}
+            onRefresh={(refreshFn) => setRefreshCustomers(() => refreshFn)}
           />
+
+          {showAddCustomer && (
+            <AddCustomer
+              onCustomerSaved={(createdCustomer) => {
+                if (refreshCustomers) refreshCustomers();
+                setSelectedCustomer(createdCustomer);
+                setSelectedOrder(null);
+                setShowAddCustomer(false);
+              }}
+              onCancel={() => setShowAddCustomer(false)}
+            />
+          )}
         </div>
 
         <div className="col-md-6">
